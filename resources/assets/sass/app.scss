@@ -67,7 +67,15 @@
    }
  }
 
-   /* footer */
+
+ #logout {
+   cursor: default;
+   &:hover {
+     background-color: transparent;
+   }
+ }
+
+ /* footer */
 
  footer {
    margin-top: 45px;
@@ -164,3 +172,4 @@
  .panel {
    margin-top: 50px;
  }
+
