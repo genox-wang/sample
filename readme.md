@@ -1,27 +1,99 @@
-## Laravel PHP Framework
+## Lavarel 入门教程学习笔记
 
-[![Build Status](https://travis-ci.org/laravel/framework.svg)](https://travis-ci.org/laravel/framework)
-[![Total Downloads](https://poser.pugx.org/laravel/framework/d/total.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/framework/v/stable.svg)](https://packagist.org/packages/laravel/framework)
-[![Latest Unstable Version](https://poser.pugx.org/laravel/framework/v/unstable.svg)](https://packagist.org/packages/laravel/framework)
-[![License](https://poser.pugx.org/laravel/framework/license.svg)](https://packagist.org/packages/laravel/framework)
+### Model
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as authentication, routing, sessions, queueing, and caching.
+#### 事件监听
 
-Laravel is accessible, yet powerful, providing powerful tools needed for large, robust applications. A superb inversion of control container, expressive migration system, and tightly integrated unit testing support give you the tools you need to build any application with which you are tasked.
+```php
 
-## Official Documentation
+class User extends Model implements AuthenticatableContract,
+                                    AuthorizableContract,
+                                    CanResetPasswordContract
+{
+    .
+    .
+    .
+    protected $hidden = ['password', 'remember_token'];
 
-Documentation for the framework can be found on the [Laravel website](http://laravel.com/docs).
+    public static function boot()
+    {
+        parent::boot();
 
-## Contributing
+        // 模型创建之前
+        static::creating(function ($user) {
+            $user->activation_token = str_random(30);
+        });
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](http://laravel.com/docs/contributions).
+        //模型创建之后
+        static::created(function ($user) {
+        });
+    }
+    .
+    .
+    .
+}
 
-## Security Vulnerabilities
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+### Migrate
 
-### License
+#### 添加列
 
-The Laravel framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT)
+```bash
+$ php artisan make:migration add_activation_to_users_table --table=users
+
+```
+
+```php
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('activation_token')->nullable();
+            $table->boolean('activated')->default(false);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('activation_token');
+            $table->dropColumn('activated');
+        });
+    }
+```
+
+### 邮件
+
+#### 配置
+
+配置`.env` ，日志调试
+
+```
+.
+.
+.
+MAIL_DRIVER=log
+.
+.
+.
+```
+
+#### 发送邮件
+
+```php
+use Mail
+
+Mail::send($view, $data, function ($message) use ($from, $name, $to, $subject) {
+    $message->from($from, $name)->to($to)->subject($subject);
+});
+```
