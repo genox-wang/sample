@@ -1,5 +1,9 @@
  @import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap";
 
+ .alert-status {
+   @extend .alert-info;
+ }
+
  $navbar-color: #3c3e42;
 
  /* universal */
