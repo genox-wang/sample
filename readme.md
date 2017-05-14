@@ -166,3 +166,42 @@ class User extends Model implements AuthenticatableContract,
 ```php
 $statuses = $user->statuses();//取出当前用户的所有状态
 ```
+
+#### 多对多
+
+##### 建立关系
+
+```php
+class User extends Model implements AuthenticatableContract,
+                                    AuthorizableContract,
+                                    CanResetPasswordContract
+{
+    .
+    .
+    .
+    public function followers()
+    {
+        return $this->belongsToMany(User::Class, 'followers', 'user_id', 'follower_id');
+    }
+
+    public function followings()
+    {
+        return $this->belongsToMany(User::Class, 'followers', 'follower_id', 'user_id');
+    }
+}    
+```
+
+##### 使用
+
+```php
+// 获取粉丝关系列表
+$user->followers();
+// 获取用户关注人列表
+$user->followings();
+// 添加关注
+$user->followings()->attach([2])
+$this->followings()->sync($user_ids, false);
+
+// 取消关注
+$this->followings()->detach($user_ids);
+```
