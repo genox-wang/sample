@@ -1,5 +1,16 @@
 ## Lavarel 入门教程学习笔记
 
+
+### RESTful
+
+#### 创建路由
+
+route.php
+
+```php
+resource('statuses', 'StatusesController', ['only' => ['store', 'destroy']]);
+```
+
 ### Model
 
 #### 事件监听
@@ -72,6 +83,26 @@ $ php artisan make:migration add_activation_to_users_table --table=users
     }
 ```
 
+#### 创建新表
+
+```bash
+$ php artisan make:migration create_statuses_table --create="statuses"
+```
+
+```php
+public function up()
+{
+  Schema::create('statuses', function (Blueprint $table) {
+    $table->increments('id');
+    $table->text('content');
+    $table->integer('user_id')->index();
+    $table->index(['created_at']);
+    $table->timestamps();
+  });
+}
+```
+
+
 ### 邮件
 
 #### 配置
@@ -96,4 +127,42 @@ use Mail
 Mail::send($view, $data, function ($message) use ($from, $name, $to, $subject) {
     $message->from($from, $name)->to($to)->subject($subject);
 });
+```
+
+### Eloquent
+
+#### 一对多
+
+##### 建立关系
+
+Status.php
+```php
+class Status extends Model
+{
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+```
+User.php
+```php
+class User extends Model implements AuthenticatableContract,
+                                    AuthorizableContract,
+                                    CanResetPasswordContract
+{
+    .
+    .
+    .
+    public function statuses()
+    {
+        return $this->hasMany(Status::class);
+    }    
+}
+```
+
+##### 使用
+
+```php
+$statuses = $user->statuses();//取出当前用户的所有状态
 ```

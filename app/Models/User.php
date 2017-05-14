@@ -50,4 +50,24 @@ class User extends Model implements AuthenticatableContract,
         $hash = md5(strtolower(trim($this->attributes['email'])));
         return "http://s.gravatar.com/avatar/$hash?s=$size";
     }
+
+    public function statuses()
+    {
+        return $this->hasMany(Status::class);
+    }
+
+    public function feed()
+    {
+        return $this->statuses()
+                    ->orderBy('created_at', 'desc');
+    }
+
+    public function show($id)
+   {
+       $user = User::findOrFail($id);
+       $statuses = $user->statuses()
+                          ->orderBy('created_at', 'desc')
+                          ->paginate(30);
+       return view('users.show', compact('user', 'statuses'));
+   }
 }
